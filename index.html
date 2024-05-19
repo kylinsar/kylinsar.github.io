@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8"/>
-    <title>简单转盘</title>
+    <title>宝宝520抽奖大转盘</title>
     <style>
       * {
         margin: 0;
@@ -275,8 +275,8 @@
           this.bg.appendChild(bgFragment);
           this.gift.appendChild(giftFragment);
 
-          // 给点击抽奖按钮添加点击事件
-          this.pointer.onclick = this.gameStart.bind(this)
+          // 绑定抽奖事件
+          this.pointer.addEventListener('click', this.gameStart.bind(this))
         },
 
         gameStart () {
@@ -316,6 +316,7 @@
           // 3. 动画结束，显示中奖结果，中奖结果如何显示，视实际情况而定
           setTimeout(() => {
             this.isGoing = false;
+            alert(`恭喜宝宝! 你获得了${res.code}`);
             console.log('中奖结果：', randomRate, res, this.typeMap[res.type]);
           }, rotateSpeed * 1000);
         }
@@ -326,16 +327,38 @@
           location: 1, // 位置
           type: 1, // 中奖
           rate: 16.67,
+          code: '任天堂Gift Card一张: E07SQN95RFR5BYP6'
         },
         { 
           location: 2,
           type: 1, // 中奖
-          rate: 16.67
+          rate: 16.67,
+          code: '任天堂Gift Card一张: E07SQN95RFR5BYP6'
         },
-        { location: 3, type: 1, rate: 16.67 },
-        { location: 4, type: 1, rate: 16.67 },
-        { location: 5, type: 1, rate: 16.67 },
-        { location: 6, type: 1, rate: 16.67 }
+        { 
+          location: 3, 
+          type: 1, 
+          rate: 16.67,
+          code: '任天堂Gift Card一张: E07SQN95RFR5BYP6'
+        },
+        { 
+          location: 4, 
+          type: 1, 
+          rate: 16.67,
+          code: '任天堂Gift Card一张: E07SQN95RFR5BYP6'
+        },
+        { 
+          location: 5, 
+          type: 1, 
+          rate: 16.67,
+          code: '任天堂Gift Card一张: E07SQN95RFR5BYP6'
+        },
+        { 
+          location: 6, 
+          type: 1, 
+          rate: 16.67,
+          code: '任天堂Gift Card一张: E07SQN95RFR5BYP6'
+        }
       ];
 
       turntable.turntable = document.querySelector('#turntable');
