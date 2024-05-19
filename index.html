@@ -3,50 +3,29 @@
   <head>
     <meta charset="utf-8"/>
     <title>宝宝520抽奖大转盘</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
       * {
         margin: 0;
         padding: 0;
+        box-sizing: border-box;
       }
       html, body {
         height: 100%;
+        font-family: Arial, sans-serif;
       }
       ul {
         list-style: none;
-      }
-      
-      @keyframes white-to-yellow {
-        0% {
-          background: #fff;
-        }
-        100% {
-          background: #d7a945;
-        }
-      }
-      @keyframes heartbeat {
-        0% {
-          transform: scale(1);
-        }
-        25% {
-          transform: scale(0.8);
-        }
-        50% {
-          transform: scale(1.2);
-        }
-        75% {
-          transform: scale(0.9);
-        }
-        100% {
-          transform: scale(1);
-        }
       }
 
       .turntable-wrap {
         position: relative;
         overflow: hidden;
-        margin: 50px;
-        width: 340px;
-        height: 340px;
+        margin: 50px auto;
+        width: 90vw;
+        height: 90vw;
+        max-width: 340px;
+        max-height: 340px;
         border: 7px solid #b2a98d;
         border-radius: 50%;  
         box-shadow: 0 0 20px #b2a98d;
@@ -94,8 +73,8 @@
       .turntable-wrap .turntable {
         position: absolute;
         margin: 20px;
-        width: 300px;
-        height: 300px;
+        width: calc(100% - 40px);
+        height: calc(100% - 40px);
         border-radius: 50%;
         background: #fff;
       }
@@ -175,9 +154,8 @@
         box-sizing: border-box;
         position: absolute;
         top: 50%;
-        left: 0;
-        right: 0;
-        margin: -23px auto;
+        left: 50%;
+        transform: translate(-50%, -50%);
         width: 46px;
         height: 46px;
         border-radius: 50%;
@@ -195,13 +173,49 @@
         content: '';
         position: absolute;
         top: -58px;
-        left: 0;
-        right: 0;
-        margin: 0 auto;
+        left: 50%;
+        transform: translateX(-50%);
         width: 0;
         border-style: solid;
         border-color: transparent transparent #b9a046 transparent;
         border-width: 25px 10px 25px 10px;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0,0,0);
+        background-color: rgba(0,0,0,0.4);
+      }
+
+      .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 300px;
+        text-align: center;
+      }
+
+      .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+      }
+
+      .close:hover,
+      .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
       }
     </style>
   </head>
@@ -212,7 +226,15 @@
         <ul class="bg" id="turntable_bg"></ul>
         <ul class="gift" id="turntable_gift"></ul>
       </div>
-      <div class="pointer disabled" id="turntable_pointer">点击抽奖</div>
+      <div class="pointer" id="turntable_pointer">点击抽奖</div>
+    </div>
+
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <p id="modal-text">恭喜中奖！礼品卡代码: </p>
+      </div>
     </div>
 
     <script> 
@@ -249,39 +271,37 @@
           for (let i = 0; i < this.lightNum; i++) {
             let lightItem = document.createElement('span');
             let deg = (360 / this.lightNum) * i
-            lightItem.style.transform = `rotate(${deg}deg)`;
+            lightItem.style.transform = `rotate(${deg}deg)`
             lightFragment.appendChild(lightItem);
           }
           this.light.appendChild(lightFragment);
 
-          // 初始化转盘背景、转盘上的中奖图（用不同背景色代替）
+          // 初始化背景
           let bgFragment = document.createDocumentFragment();
-          let bgItemWidth = this.bg.offsetWidth / this.num;
-          let giftFragment = document.createDocumentFragment();
           for (let i = 0; i < this.itemNum; i++) {
             let bgItem = document.createElement('li');
-            let deg = (360 / this.itemNum) * i
-            bgItem.style.transform = `rotate(${deg}deg)`;
+            bgItem.style.transform = `rotate(${360 / this.itemNum * i}deg)`
             bgFragment.appendChild(bgItem);
-
-            let giftItem = document.createElement('li');
-            giftItem.style.transform = `rotate(${deg}deg)`;
-            giftItem.className = this.typeClassMap[this.lottery[i].type];
-            let span = document.createElement('span');
-            span.innerHTML = this.typeMap[this.lottery[i].type];
-            giftItem.appendChild(span);
-            giftFragment.appendChild(giftItem)
           }
           this.bg.appendChild(bgFragment);
+
+          // 初始化奖品
+          let giftFragment = document.createDocumentFragment();
+          this.lottery.forEach(item => {
+            let giftItem = document.createElement('li');
+            giftItem.className = this.typeClassMap[item.type];
+            giftItem.style.transform = `rotate(${360 / this.itemNum * (item.location - 1)}deg)`
+            giftItem.innerHTML = `<span>${this.typeMap[item.type]}</span>`;
+            giftFragment.appendChild(giftItem);
+          })
           this.gift.appendChild(giftFragment);
 
-          // 绑定抽奖事件
-          this.pointer.addEventListener('click', this.gameStart.bind(this))
+          this.pointer.onclick = this.start.bind(this);
         },
-
-        gameStart () {
+        
+        start () {
           if (this.isGoing) {
-            return
+            return;
           }
           this.isGoing = true;
 
@@ -316,13 +336,13 @@
           // 3. 动画结束，显示中奖结果，中奖结果如何显示，视实际情况而定
           setTimeout(() => {
             this.isGoing = false;
-            alert(`恭喜宝宝! 你获得了${res.code}`);
-            console.log('中奖结果：', randomRate, res, this.typeMap[res.type]);
+            document.getElementById('modal-text').innerText = `恭喜宝宝! 你获得了${res.code}`;
+            document.getElementById('myModal').style.display = "block";
           }, rotateSpeed * 1000);
         }
       }
       
-      let lottery = [
+     let lottery = [
         {
           location: 1, // 位置
           type: 1, // 中奖
@@ -368,6 +388,24 @@
       turntable.pointer = document.querySelector('#turntable_pointer');
       turntable.lottery = lottery;
       turntable.init();
+
+      // 获取模态框
+      var modal = document.getElementById("myModal");
+
+      // 获取 <span> 元素，设置关闭模态框按钮
+      var span = document.getElementsByClassName("close")[0];
+
+      // 点击 <span> (x)，关闭模态框
+      span.onclick = function() {
+        modal.style.display = "none";
+      }
+
+      // 在用户点击模态框内容之外的任意地方时，关闭模态框
+      window.onclick = function(event) {
+        if (event.target == modal) {
+          modal.style.display = "none";
+        }
+      }
     </script>
   </body>
 </html>
